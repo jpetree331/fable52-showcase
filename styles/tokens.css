@@ -1,0 +1,106 @@
+/* Design tokens. Every colour, font and measure the app uses is named here;
+   app.css refers to roles, never to raw values. The dark theme is chosen, not
+   inverted: each colour is re-picked against the dark surface. */
+
+:root {
+  color-scheme: light;
+
+  /* surfaces */
+  --paper: #f4eee1;
+  --card: #fbf8f0;
+  --well: #f0e9da;
+  --grid: rgba(96, 78, 46, 0.055);
+
+  /* ink */
+  --ink: #25211b;
+  --ink-2: #5a5346;
+  --ink-3: #8a8170;
+  --rule: #ddd3c0;
+  --rule-strong: #c9bda6;
+
+  /* accent: vermilion, the alchemist's red */
+  --accent: #a23e25;
+  --accent-ink: #fff8f0;
+  --accent-wash: #f3e0d6;
+
+  /* status */
+  --good: #2a6b59;
+  --good-wash: #dcebe3;
+  --warn: #8a5d0c;
+  --warn-wash: #f5e8c9;
+  --bad: #a3312b;
+  --bad-wash: #f6dcd8;
+
+  /* chart series: checked for colour-blind separation on both surfaces (see README) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+
+  /* element colours in structure drawings */
+  --el-O: #c0392b;
+  --el-N: #2c5fb8;
+  --el-S: #a67c00;
+  --el-P: #c2611f;
+  --el-F: #23805a;
+  --el-Cl: #23805a;
+  --el-Br: #8b3a1e;
+  --el-I: #6a3d9a;
+  --el-B: #b5651d;
+
+  /* type */
+  --font-display: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Libre Franklin', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  /* formulas are set in a sans: its round O cannot be mistaken for a zero */
+  --font-formula: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+
+  /* measure */
+  --radius: 10px;
+  --radius-small: 6px;
+  --page: 1040px;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 1px 2px rgba(60, 44, 20, 0.06), 0 8px 24px -12px rgba(60, 44, 20, 0.18);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper: #171512;
+  --card: #1f1c18;
+  --well: #26221d;
+  --grid: rgba(236, 222, 190, 0.035);
+
+  --ink: #ece5d6;
+  --ink-2: #b9b09e;
+  --ink-3: #857c6b;
+  --rule: #37322a;
+  --rule-strong: #4a4439;
+
+  --accent: #e5805f;
+  --accent-ink: #1b1512;
+  --accent-wash: #3a241c;
+
+  --good: #6cc0a6;
+  --good-wash: #1b2e28;
+  --warn: #dbab4c;
+  --warn-wash: #33290f;
+  --bad: #ec8078;
+  --bad-wash: #3a1e1b;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+
+  --el-O: #ff8272;
+  --el-N: #86adff;
+  --el-S: #e3b341;
+  --el-P: #f0965a;
+  --el-F: #63d39a;
+  --el-Cl: #63d39a;
+  --el-Br: #e09a78;
+  --el-I: #bd97e3;
+  --el-B: #e0a56a;
+
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
+}

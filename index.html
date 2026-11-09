@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alembic — a chemistry workbench</title>
+    <meta name="description" content="Balance equations exactly, draw molecules from SMILES, and compute titration curves from first principles. No dependencies, no build step." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23a23e25'/%3E%3Cpath d='M10 5h6M13 5v6.5a7.5 7.5 0 1 0 6.3 3.4L27 12v6' fill='none' stroke='%23fbf8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <script>
+      // Set the theme before first paint so there is no flash.
+      (function () {
+        var theme = null;
+        try {
+          theme = localStorage.getItem('alembic-theme');
+        } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Libre+Franklin:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/tokens.css" />
+    <link rel="stylesheet" href="styles/app.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="masthead">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M10 5h6M13 5v6.5a7.5 7.5 0 1 0 6.3 3.4L27 12v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7.2 21.5a6 6 0 0 0 11.6 0z" fill="currentColor" opacity="0.28" />
+          </svg>
+          <div>
+            <h1>Alembic</h1>
+            <p class="strap">A chemistry workbench, distilled from first principles.</p>
+          </div>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch between light and dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" /></svg>
+        </button>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="Instruments">
+        <button class="tab" role="tab" id="tab-balance" data-tab="balance" aria-controls="panel-balance" type="button">
+          <span class="tab-numeral">I</span>
+          <span class="tab-text"><strong>Balance</strong><small>equations, exactly</small></span>
+        </button>
+        <button class="tab" role="tab" id="tab-structure" data-tab="structure" aria-controls="panel-structure" type="button">
+          <span class="tab-numeral">II</span>
+          <span class="tab-text"><strong>Structure</strong><small>SMILES to skeletal formula</small></span>
+        </button>
+        <button class="tab" role="tab" id="tab-titrate" data-tab="titrate" aria-controls="panel-titrate" type="button">
+          <span class="tab-numeral">III</span>
+          <span class="tab-text"><strong>Titrate</strong><small>pH from charge balance</small></span>
+        </button>
+      </nav>
+
+      <main>
+        <!-- I. Balance -->
+        <section class="panel" id="panel-balance" role="tabpanel" aria-labelledby="tab-balance" hidden>
+          <header class="panel-head">
+            <h2>Balance an equation</h2>
+            <p>
+              Write a reaction, with or without coefficients. Charges go after a caret — <code>Fe^3+</code>,
+              <code>SO4^2-</code> — and an electron is <code>e-</code>. Pasted superscripts such as Fe³⁺ work too.
+            </p>
+          </header>
+          <label class="entry">
+            <span class="entry-label">Equation</span>
+            <input class="entry-input" id="eq-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" placeholder="Fe + O2 -> Fe2O3" />
+          </label>
+          <div class="chips" id="eq-examples" aria-label="Examples"></div>
+          <div class="result" id="eq-result" aria-live="polite"></div>
+          <details class="method">
+            <summary>How it works</summary>
+            <p>
+              Each species gets an unknown coefficient, and each element — plus net charge, when ions are present — gets a
+              conservation equation. The balanced equations are exactly the <em>null space</em> of that matrix. It is found by
+              Gaussian elimination over exact fractions (arbitrary-precision integers, never floating point), then scaled to
+              the smallest whole numbers.
+            </p>
+            <p>
+              The size of the null space is the honest part. One dimension means one answer. Zero means the equation cannot
+              balance, and the element at fault is named. Two or more means the "equation" is several independent reactions
+              written as one, and no amount of algebra can choose between them — so the page says so rather than guessing.
+            </p>
+          </details>
+        </section>
+
+        <!-- II. Structure -->
+        <section class="panel" id="panel-structure" role="tabpanel" aria-labelledby="tab-structure" hidden>
+          <header class="panel-head">
+            <h2>Draw a molecule</h2>
+            <p>
+              Enter a <abbr title="Simplified Molecular Input Line Entry System">SMILES</abbr> string: atoms as letters,
+              <code>=</code> and <code>#</code> for double and triple bonds, parentheses for branches, matching digits to close
+              rings, lowercase for aromatic atoms.
+            </p>
+          </header>
+          <label class="entry">
+            <span class="entry-label">SMILES</span>
+            <input class="entry-input" id="smiles-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" placeholder="CC(=O)Oc1ccccc1C(=O)O" />
+          </label>
+          <div class="chips" id="smiles-examples" aria-label="Examples"></div>
+          <div class="result" id="smiles-result" aria-live="polite"></div>
+          <details class="method">
+            <summary>How it works</summary>
+            <p>
+              A hand-written parser turns the string into a graph, fills in the hydrogens each atom's valence implies, and finds
+              the rings with Horton's minimum-cycle-basis algorithm. Aromatic rings are then <em>kekulized</em>: a
+              perfect-matching search assigns the alternating double bonds, and a ring with no valid assignment is rejected
+              rather than drawn.
+            </p>
+            <p>
+              Coordinates come from geometry, not from a template library. Rings are placed as arcs of a circle chosen so every
+              bond has the same length — one rule that produces fused hexagons, five-membered rings and spiro centres alike —
+              and chains grow outward into whatever angle is free. Cage molecules that cannot lie flat fall back to a
+              spring-relaxed projection. Stereochemistry is read but not drawn.
+            </p>
+          </details>
+        </section>
+
+        <!-- III. Titrate -->
+        <section class="panel" id="panel-titrate" role="tabpanel" aria-labelledby="tab-titrate" hidden>
+          <header class="panel-head">
+            <h2>Run a titration</h2>
+            <p>Choose what is in the flask and what is in the burette. Move across the curve to read the pH at any volume.</p>
+          </header>
+          <form class="controls" id="titrate-controls" autocomplete="off">
+            <label class="control control-wide">
+              <span>In the flask</span>
+              <select id="analyte"></select>
+            </label>
+            <label class="control">
+              <span>Concentration <em>mol/L</em></span>
+              <input id="analyte-conc" type="number" min="0.0001" max="5" step="any" value="0.1" inputmode="decimal" />
+            </label>
+            <label class="control">
+              <span>Volume <em>mL</em></span>
+              <input id="analyte-volume" type="number" min="1" max="1000" step="any" value="25" inputmode="decimal" />
+            </label>
+            <label class="control control-wide">
+              <span>In the burette</span>
+              <select id="titrant"></select>
+            </label>
+            <label class="control">
+              <span>Concentration <em>mol/L</em></span>
+              <input id="titrant-conc" type="number" min="0.0001" max="5" step="any" value="0.1" inputmode="decimal" />
+            </label>
+            <label class="control control-wide">
+              <span>Indicator</span>
+              <select id="indicator"></select>
+            </label>
+          </form>
+          <div class="result" id="titrate-result" aria-live="polite"></div>
+          <details class="method">
+            <summary>How it works</summary>
+            <p>
+              There are no special cases here — no separate formula for a weak acid, a buffer, or the far side of the
+              equivalence point. At every volume the page writes down one equation, the <em>charge balance</em>, and solves it
+              for [H⁺] by bisection, which cannot fail to converge because the imbalance falls steadily as pH rises.
+            </p>
+            <p>
+              Henderson–Hasselbalch and the other textbook shortcuts are approximations of that one equation; the test suite
+              checks that they agree with it wherever they are supposed to. The model assumes 25 °C and an ideal solution, so
+              a real pH meter will drift from it in concentrated or strongly ionic solutions.
+            </p>
+          </details>
+        </section>
+      </main>
+
+      <footer class="colophon">
+        <p>
+          Built by Fable 5.2 for Culurien. No frameworks, no dependencies, no build step —
+          <a href="https://github.com/jpetree331/fable52-showcase">read the source</a>.
+        </p>
+      </footer>
+    </div>
+    <script type="module" src="src/ui/main.js"></script>
+  </body>
+</html>

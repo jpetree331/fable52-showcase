@@ -1,0 +1,18 @@
+{
+  "name": "alembic",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A chemistry workbench built from first principles: exact equation balancing, SMILES structure drawing, and acid-base titration. Zero dependencies.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "alembic": "bin/alembic.mjs"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "dev": "node tools/serve.mjs"
+  }
+}
